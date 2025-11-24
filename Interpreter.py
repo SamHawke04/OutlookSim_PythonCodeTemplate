@@ -9,6 +9,8 @@
 ### Partner B:                                                                                ###
 ###            <Full name as appears on Moodle>, SID<student ID>                              ###
 #################################################################################################
+from fontTools.ttLib import tagToXML
+from prettytable import from_mediawiki
 
 # DO NOT CHANGE FUNCTION NAMES
 # replace "pass" with your own code as specified in the CW spec.
@@ -89,31 +91,55 @@ def loop():
                 # add email1223@gre.ac.uk email723@gre.ac.uk 29/5/2025 subject99 conf %%Body99911. Isfeo afwco sxzmp.
                 # add email142@gre.ac.uk email788@gre.ac.uk 29/5/2025 subject88 prsnl %%Body11332. Isfffffeo sxzmp.
                 # add email116@gre.ac.uk email142@gre.ac.uk 29/5/2025 subject36 tag1 %%Body:Body68. Wods vmm tskgdrxzrk.
-                pass
+                counter=0
+                frm,to,date,subject,tag,body,word= ""
+                for index, chara in enumerate(args):
+                    if chara == " ":
+                        match counter:
+                            case '0':
+                                frm = word
+                            case '1':
+                                to = word
+                            case '2':
+                                date = word
+                            case '3':
+                                subject = word
+                            case '4':
+                                tag = word
+                            case '5':
+                                body = word
+                        word = ""
+                        counter = +1
+                    else:
+                        word = word + chara
+
+                mba.add_email(frm,to,date,subject,tag,body)
+
+
             case 'del':  # move email with given ID to bin folder
                 # example command prompt:
                 # del 10
-                pass
+                mba.del_email(args)
             case 'flt':
                 # example command prompt:
                 # flt email13
-                pass
+                mba.filter(args)
             case 'fnd':
                 # example command prompt:
                 # fnd 12/3/2025
-                pass
+                mba.find(args)
             case 'get' :                # retrieve and display email Mail object given email ID
                 # example command prompt:
                 # get 10
-                pass
+                mba.get_email(args)
             case 'lst' :                # display entire mailbox
                 # example command prompt:
                 # lst
-                pass
+                mba.show_emails()
             case 'mrkr':
                 # example command prompt:
-                # mrkr 10
-                pass
+                # mrkr 10 sads
+                mba.mark(args)
             case 'mrkf':
                 # example command prompt:
                 # mrkf 10

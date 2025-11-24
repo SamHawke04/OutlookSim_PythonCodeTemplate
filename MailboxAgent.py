@@ -36,12 +36,15 @@ class MailboxAgent:
                      msg[4].split(":")[1], msg[5].split(":")[1], msg[6].split(":")[1]))
         return mailbox
 
+    def getemail_data(self):
+        return self._mailbox
+
 # FEATURES A (Partner A)
     # FA.1
     # 
     def get_email(self, m_id):
         gottedMail = []
-        for e in self.emailData:
+        for e in self.getemail_data():
             if str(m_id) == str(e.id):
                 gottedMail.append(e)
                 return gottedMail
@@ -55,7 +58,7 @@ class MailboxAgent:
             print("No email found with that ID.")
             input("☆ Press Enter to continue ☆")
             return
-        for e in self.emailData:
+        for e in self.getemail_data():
             if str(e.id) == str(m_id):
                 e.tag = "bin"
                 print("Email has been moved to bin.")
@@ -65,7 +68,7 @@ class MailboxAgent:
     # FA.4
     # 
     def filter(self, frm):
-        filteredemails = [e for e in self.emailData if str(frm) == str(e.from_email)]       
+        filteredemails = [e for e in self.getemail_data() if str(frm) == str(e.from_email)]
         table = ColorTable(theme=Themes.OCEAN)
         table.field_names = ["ID", "From", "To", "Date", "Subject", "Tag", "Body"]
         for e in filteredemails:
@@ -93,10 +96,10 @@ class MailboxAgent:
         showEmailUI.field_names = ["ID", "From", "To", "Date", "Subject", "Tag", "Body"]
 
         #Loops through all email data and adds:
-        #ID, from, to, date, subject, tag, body
+        #ID, from, to, date, subject, tag, bodysa
         #All into a row
         #then to show the Table you simply print it
-        for e in self.emailData:
+        for e in self.getemail_data():
             showEmailUI.add_row([e.id, e.from_email, e.to_email, e.date, e.subject, e.tag, e.body])
 
         print()
@@ -110,19 +113,19 @@ class MailboxAgent:
 
     # FB.3
     # 
-    def mark(self, m_id, m_type):
-        if(m_type == "READ"):    #Mark Read
-           self.getemail(m_id).read = True
-        elif(m_type == "FLAG"):  #Flagged
-            self.getemail(m_id).flag = True
+    def markFlag(self, m_id):
+        self.get_email(m_id).flag = True
+
+    def markRead(self, m_id):
+        self.get_email(m_id).read = False
 
     # FB.4
     # 
     def find(self, date):
-        # search though emaildata
+        # search though email_data
         # return list of Mail where Mail.date == date
         returnlist = []
-        for e in self.emailData:
+        for e in self.getemail_data():
             if e.date == date:
                 returnlist.append(e)
         return returnlist
@@ -141,11 +144,11 @@ class MailboxAgent:
         match tag.lower():
             # FA.6
             case 'conf':     # executed when tag is 'conf'
-                newMail = Confidential(len(self.emailData), frm, to, date, subject, tag, body, False, False)
+                newMail = Confidential(len(self.getemail_data()), frm, to, date, subject, tag, body, False, False)
             # FB.6
             case 'prsnl':    # executed when tag is 'prsnl'
-                newMail = Personal(len(self.emailData), frm, to, date, subject, tag, body, False, False)
+                newMail = Personal(len(self.getemail_data()), frm, to, date, subject, tag, body, False, False)
             # FA&B.6
             case _:          # executed when tag is neither 'conf' nor 'prsnl'
-                newMail = Mail(len(self.emailData), frm, to, date, subject, tag, body, False, False)
-        self.emailData.append(newMail)
+                newMail = Mail(len(self.getemail_data()), frm, to, date, subject, tag, body, False, False)
+        self.getemail_data().append(newMail)
