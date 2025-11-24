@@ -7,6 +7,7 @@
 ### Partner B:                                                                                ###
 ###            <Full name as appears on Moodle>, SID<student ID>                              ###
 #################################################################################################
+from contextlib import nullcontext
 
 # DO NOT CHANGE CLASS OR METHOD NAMES
 # replace "pass" with your own code as specified in the CW spec.
@@ -14,7 +15,7 @@
 from Mail import *
 from Confidential import *
 from Personal import *
-from prettytable.colortable import ColorTable, Themes
+import pprint
 
 class MailboxAgent:
     """<This is the documentation for MailboxAgent. All methods defined in this class are used to manage the mailbox containing emails represented as Mail objects.>"""
@@ -36,49 +37,46 @@ class MailboxAgent:
                      msg[4].split(":")[1], msg[5].split(":")[1], msg[6].split(":")[1]))
         return mailbox
 
-    def getemail_data(self):
+    def getmailbox(self):
         return self._mailbox
 
 # FEATURES A (Partner A)
     # FA.1
     # 
-    def get_email(self, m_id):
-        gottedMail = []
-        for e in self.getemail_data():
-            if str(m_id) == str(e.id):
-                gottedMail.append(e)
-                return gottedMail
-        return gottedMail
+    def get_email(self, inputtedID):
+        for e in self.getmailbox():
+            #build the check id (for some reason it thinks itself is a list
+            idtocheck=""
+            for character in inputtedID:
+                idtocheck = str(idtocheck)+str(character)
+            if idtocheck == str(e.m_id):
+                return e
+        return False
 
     # FA.3
     # 
     def del_email(self, m_id):
-        gottedMail = self.get_email(m_id)
-        if not gottedMail:
+        if not self.get_email(m_id):
             print("No email found with that ID.")
-            input("☆ Press Enter to continue ☆")
             return
-        for e in self.getemail_data():
-            if str(e.id) == str(m_id):
-                e.tag = "bin"
-                print("Email has been moved to bin.")
-                input("☆ Press Enter to continue ☆ ")
-                return
+        self.get_email(m_id).tag = "bin"
 
     # FA.4
     # 
     def filter(self, frm):
-        filteredemails = [e for e in self.getemail_data() if str(frm) == str(e.from_email)]
-        table = ColorTable(theme=Themes.OCEAN)
-        table.field_names = ["ID", "From", "To", "Date", "Subject", "Tag", "Body"]
-        for e in filteredemails:
-            table.add_row([e.id, e.from_email, e.to_email, e.date, e.subject, e.tag, e.body])
-        print()
-        if filteredemails:
-            print(table)
-        else:
-            print("No emails found from that sender...")
-        input("☆ Press Enter to continue ☆ ")
+        # substring e in self.getmailbox() to grab everything before the @ using method found in personal
+        # loop through mailbox
+        # loop through each character to get rid of @
+        # check mailbox.frm(with the @ removed) against frm
+
+        filteredemails = []
+        for e in self.getmailbox():
+            for index, character in enumerate(e.frm):
+                if character == "@":
+                    UserID = e.frm[:index]
+                    if UserID == frm:
+                        filteredemails.append(e)
+        return filteredemails
 
     # FA.5
     # 
@@ -91,21 +89,29 @@ class MailboxAgent:
     # FB.1
     # 
     def show_emails(self):
-        #Creates Table
-        showEmailUI = ColorTable(theme=Themes.OCEAN)
-        showEmailUI.field_names = ["ID", "From", "To", "Date", "Subject", "Tag", "Body"]
+        headers = ["Id", "From", "To", "Date", "Subject", "Tag", "Body"]
 
-        #Loops through all email data and adds:
-        #ID, from, to, date, subject, tag, bodysa
-        #All into a row
-        #then to show the Table you simply print it
-        for e in self.getemail_data():
-            showEmailUI.add_row([e.id, e.from_email, e.to_email, e.date, e.subject, e.tag, e.body])
+        # Changes the width of the column by looping through each email and finding the highest length in each attribute
+        col_widths = [len(h) for h in headers]
+        for mail in self.getmailbox():
+            values = [mail.m_id, mail.frm, mail.to, mail.date, mail.subject, mail.tag, mail.body]
+            for i, v in enumerate(values):
+                col_widths[i] = max(col_widths[i], len(v))
 
-        print()
-        print(showEmailUI)
-        input("☆ Press Enter to continue ☆")
+        # Build header row (have to use join() to add the spaces)
+        header_row = " | ".join(h.ljust(col_widths[i]) for i, h in enumerate(headers))
 
+        # Build each row, each row is a new email
+        rows = []
+        for mail in self.getmailbox():
+            values = [mail.m_id, mail.frm, mail.to, mail.date, mail.subject, mail.tag, mail.body]
+            row = " | ".join(v.ljust(col_widths[i]) for i, v in enumerate(values))
+            rows.append(row)
+
+        # Print each line separately to make output exactly like the coursework FB.1 spec photo
+        print(header_row)
+        for row in rows:
+            print(row)
     # FB.2
     # 
     def mv_email(self, m_id, tag):
@@ -117,18 +123,17 @@ class MailboxAgent:
         self.get_email(m_id).flag = True
 
     def markRead(self, m_id):
-        self.get_email(m_id).read = False
+        self.get_email(m_id).read = True
 
     # FB.4
     # 
     def find(self, date):
         # search though email_data
         # return list of Mail where Mail.date == date
-        returnlist = []
-        for e in self.getemail_data():
+        for e in self.getmailbox():
             if e.date == date:
-                returnlist.append(e)
-        return returnlist
+                return e
+        return False
 
     # FB.5
     # 
@@ -140,15 +145,15 @@ class MailboxAgent:
 # FEATURE 6 (Partners A and B)
     # 
     def add_email(self, frm, to, date, subject, tag, body):
-        # code must generate unique m_id
+        # code must generate unique m_id, must put the id as a string otherwise lst breaks :(
         match tag.lower():
             # FA.6
             case 'conf':     # executed when tag is 'conf'
-                newMail = Confidential(len(self.getemail_data()), frm, to, date, subject, tag, body, False, False)
+                newMail = Confidential(str(len(self.getmailbox())), frm, to, date, subject, tag, body)
             # FB.6
             case 'prsnl':    # executed when tag is 'prsnl'
-                newMail = Personal(len(self.getemail_data()), frm, to, date, subject, tag, body, False, False)
+                newMail = Personal(str(len(self.getmailbox())), frm, to, date, subject, tag, body)
             # FA&B.6
             case _:          # executed when tag is neither 'conf' nor 'prsnl'
-                newMail = Mail(len(self.getemail_data()), frm, to, date, subject, tag, body, False, False)
-        self.getemail_data().append(newMail)
+                newMail = Mail(str(len(self.getmailbox())), frm, to, date, subject, tag, body)
+        self.getmailbox().append(newMail)

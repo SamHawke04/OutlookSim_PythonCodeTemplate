@@ -9,14 +9,13 @@
 ### Partner B:                                                                                ###
 ###            <Full name as appears on Moodle>, SID<student ID>                              ###
 #################################################################################################
-from fontTools.ttLib import tagToXML
-from prettytable import from_mediawiki
 
 # DO NOT CHANGE FUNCTION NAMES
 # replace "pass" with your own code as specified in the CW spec.
 
 from MailboxAgent import *
 import random, string
+import pprint
 
 # gen_bdy Generates random text for the email body
 # DO NOT MODIFY
@@ -91,47 +90,32 @@ def loop():
                 # add email1223@gre.ac.uk email723@gre.ac.uk 29/5/2025 subject99 conf %%Body99911. Isfeo afwco sxzmp.
                 # add email142@gre.ac.uk email788@gre.ac.uk 29/5/2025 subject88 prsnl %%Body11332. Isfffffeo sxzmp.
                 # add email116@gre.ac.uk email142@gre.ac.uk 29/5/2025 subject36 tag1 %%Body:Body68. Wods vmm tskgdrxzrk.
-                counter=0
-                frm,to,date,subject,tag,body,word= ""
-                for index, chara in enumerate(args):
-                    if chara == " ":
-                        match counter:
-                            case '0':
-                                frm = word
-                            case '1':
-                                to = word
-                            case '2':
-                                date = word
-                            case '3':
-                                subject = word
-                            case '4':
-                                tag = word
-                            case '5':
-                                body = word
-                        word = ""
-                        counter = +1
-                    else:
-                        word = word + chara
 
-                mba.add_email(frm,to,date,subject,tag,body)
+                # body building
+                # any arg 5 and above is part of the body
+                body = ""
+                for word in args[5:]:
+                    body = body+" "+word
+                mba.add_email(args[0],args[1],args[2],args[3],args[4],body)
 
 
             case 'del':  # move email with given ID to bin folder
                 # example command prompt:
                 # del 10
-                mba.del_email(args)
+                mba.del_email(args[0])
             case 'flt':
                 # example command prompt:
                 # flt email13
-                mba.filter(args)
+                for x in mba.filter(args[0]):
+                    pprint.pprint(vars(x))
             case 'fnd':
                 # example command prompt:
                 # fnd 12/3/2025
-                mba.find(args)
+                pprint.pprint(vars(mba.find(args[0])))
             case 'get' :                # retrieve and display email Mail object given email ID
                 # example command prompt:
                 # get 10
-                mba.get_email(args)
+                pprint.pprint(vars(mba.get_email(args[0])))
             case 'lst' :                # display entire mailbox
                 # example command prompt:
                 # lst
@@ -139,15 +123,15 @@ def loop():
             case 'mrkr':
                 # example command prompt:
                 # mrkr 10 sads
-                mba.mark(args)
+                mba.markRead(args[0])
             case 'mrkf':
                 # example command prompt:
                 # mrkf 10
-                pass
+                mba.markFlag(args[0])
             case 'mv':                  # move email with given ID to folder in given tag
                 # example command prompt:
                 # mv 10 conf
-                pass
+                mba.mv_email(args[0], args[1])
 
         line = input('mba > ')
         words = line.split(' ')

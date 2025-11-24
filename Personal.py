@@ -29,7 +29,7 @@ class Personal():
                 UserID = self.frm[:index]
         
         #Get rid of "Body" in subject
-        self.subject[3:]
+        self.subject = self.subject[3:]
         
         #Find Longest Word
         #Find Average

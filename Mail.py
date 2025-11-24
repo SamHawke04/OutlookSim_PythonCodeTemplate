@@ -11,7 +11,6 @@
 # DO NOT CHANGE CLASS OR METHOD NAMES
 # replace "pass" with your own code as specified in the CW spec.
 
-from prettytable.colortable import ColorTable, Themes
 
 class Mail:
     """ """
@@ -85,32 +84,23 @@ class Mail:
     # FA.2
     #
     def show_email(self):
-        showedMail = self.get_email(self.id)
-        if not showedMail:
-            print("No email found with that ID.")
-            input("☆ Press Enter to continue ☆")
-            return
-        mail_obj = showedMail[0]
-        gottedEmail = ColorTable(theme=Themes.OCEAN)
         # If the email has a conf label, output this format
         # Anyhting else, output the other format under the else statement
         # Uses f"" so that it doesn't show the curly brackets
-        if mail_obj.tag == "conf":
-            gottedEmail.add_column("CONFIDENTIAL", ["CONFIDENTIAL"])
-            gottedEmail.add_column("From", [f"{mail_obj.from_email}"])
-            gottedEmail.add_column("Date", [f"{mail_obj.date}"])
-            gottedEmail.add_column("Subject", [f"{mail_obj.subject}"])
-            gottedEmail.add_column("Encrypted Body Text", [f"{mail_obj.body}"])
-            gottedEmail.add_column("Flagged?", [f"{mail_obj.flag}"])
+        if self.tag == "conf":
+            print("CONFIDENTIAL", ["CONFIDENTIAL"])
+            print("From", [f"{self.frm}"])
+            print("Date", [f"{self.date}"])
+            print("Subject", [f"{self.subject}"])
+            print("Encrypted Body Text", [f"{self.body}"])
+            print("Flagged?", [f"{self.flag}"])
         else:
-            gottedEmail.add_column("ID", [f"{mail_obj.id}"])
-            gottedEmail.add_column("From", [f"{mail_obj.from_email}"])
-            gottedEmail.add_column("To", [f"{mail_obj.to_email}"])
-            gottedEmail.add_column("Date", [f"{mail_obj.date}"])
-            gottedEmail.add_column("Subject", [f"{mail_obj.subject}"])
-            gottedEmail.add_column("Tag", [f"{mail_obj.tag}"])
-            gottedEmail.add_column("Body", [f"{mail_obj.body}"])
-            gottedEmail.add_column("Flag", [f"{mail_obj.flag}"])
-            gottedEmail.add_column("Read", [f"{mail_obj.read}"])
-        print(gottedEmail)
-        input("☆ Press Enter to continue ☆")
+            print("ID", [f"{self.m_id}"])
+            print("From", [f"{self.frm}"])
+            print("To", [f"{self.to}"])
+            print("Date", [f"{self.date}"])
+            print("Subject", [f"{self.subject}"])
+            print("Tag", [f"{self.tag}"])
+            print("Body", [f"{self.body}"])
+            print("Flag", [f"{self.flag}"])
+            print("Read", [f"{self.read}"])
